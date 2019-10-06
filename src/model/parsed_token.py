@@ -1,5 +1,12 @@
 from dataclasses import dataclass
-from typing import List, Literal
+from enum import Enum
+from typing import List
+
+
+class ScopeAction(Enum):
+    OPEN = 1
+    CLOSE = 2
+    NONE = 3
 
 
 @dataclass
@@ -7,5 +14,5 @@ class ParsedToken:
     is_valid: bool
     function_name: str
     arguments: List[str]
-    scope: Literal["open", "close", "none"]
-    raw_text: str
+    scope: ScopeAction
+    raw_text: List[str]

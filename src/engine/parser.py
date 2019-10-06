@@ -1,6 +1,6 @@
 from io import TextIOBase
 
-from src.model.parsed_token import ParsedToken
+from src.model.parsed_token import ParsedToken, ScopeAction
 
 
 class Parser:
@@ -17,24 +17,39 @@ class Parser:
     def parse_single_construct(self, input_stream: TextIOBase):
         read_sequence = []
         char = input_stream.read(1)
+
+        # end of stream
+        if char == '':
+            return ParsedToken(True, "end", [], ScopeAction.NONE, [])
+
         read_sequence.append(char)
 
         has_template_open, current_read_sequence = self.try_parse_template_border(
+            char,
             input_stream,
             self.template_opening)
         read_sequence += current_read_sequence
+
         if has_template_open:
+            char = input_stream.read(1)
+            read_sequence.append(char)
+
             if char == self.function_open:
-                function_name, raw_text_read = self.parse_argument(input_stream)
+                function_name, raw_text_read = self.parse_argument(
+                    input_stream, " ")
                 read_sequence += raw_text_read
 
-                argument1, raw_text_read = self.parse_argument(input_stream)
+                argument1, raw_text_read = self.parse_argument(input_stream, " ")
                 read_sequence += raw_text_read
 
-                argument2, raw_text_read = self.parse_argument(input_stream)
+                argument2, raw_text_read = self.parse_argument(
+                    input_stream,
+                    self.template_closing[0])
                 read_sequence += raw_text_read
 
+                last_char = read_sequence[-1]
                 has_template_close, current_read_sequence = self.try_parse_template_border(
+                    last_char,
                     input_stream,
                     self.template_closing)
                 read_sequence += current_read_sequence
@@ -44,20 +59,26 @@ class Parser:
                         True,
                         function_name,
                         [argument1, argument2],
-                        "open",
+                        ScopeAction.OPEN,
                         read_sequence)
                 else:
                     return ParsedToken(
                         False,
+                        'error',
+                        [],
+                        ScopeAction.NONE,
                         raw_text=read_sequence)
-            if char == self.function_close:
-                function_name, raw_text_read = self.parse_argument(input_stream)
+            elif char == self.function_close:
+                function_name, raw_text_read = self.parse_argument(
+                    input_stream,
+                    self.template_closing[0])
+
                 read_sequence += raw_text_read
 
-                char = input_stream.read(1)
-                read_sequence.append(char)
+                last_char = read_sequence[-1]
 
                 has_template_close, current_read_sequence = self.try_parse_template_border(
+                    last_char,
                     input_stream,
                     self.template_closing)
                 read_sequence += current_read_sequence
@@ -67,29 +88,43 @@ class Parser:
                         True,
                         function_name,
                         [],
-                        "close",
+                        ScopeAction.CLOSE,
                         read_sequence)
                 else:
                     return ParsedToken(
                         False,
+                        'error',
+                        [],
+                        ScopeAction.NONE,
                         raw_text=read_sequence)
             else:
-                function_name, raw_text_read = self.parse_argument(input_stream)
+                argument, raw_text_read = self.parse_argument(
+                    input_stream,
+                    self.template_closing[0])
+                argument = char + argument
                 read_sequence += raw_text_read
 
+                last_char = read_sequence[-1]
+
                 has_template_close, current_read_sequence = self.try_parse_template_border(
-                    input_stream, self.template_closing)
+                    last_char,
+                    input_stream,
+                    self.template_closing)
+
                 read_sequence += current_read_sequence
 
                 if has_template_close:
                     return ParsedToken(
                         True,
                         "print",
-                        [],
-                        "none",
+                        [argument],
+                        ScopeAction.NONE,
                         read_sequence)
                 return ParsedToken(
                     False,
+                    'error',
+                    [],
+                    ScopeAction.NONE,
                     raw_text=read_sequence)
 
         else:
@@ -97,39 +132,31 @@ class Parser:
                 True,
                 "raw",
                 [],
-                "none",
+                ScopeAction.NONE,
                 raw_text=read_sequence)
 
     @staticmethod
-    def parse_argument(input_stream):
+    def parse_argument(input_stream, stop_char):
         argument = []
         raw_text_read = []
         while True:
             char = input_stream.read(1)
             raw_text_read.append(char)
 
-            if char == ' ':
+            if char == stop_char:
                 break
             else:
                 argument.append(char)
-        return argument, raw_text_read
+        return ''.join(argument), raw_text_read
 
     @staticmethod
-    def try_parse_template_border(input_stream, template_border):
+    def try_parse_template_border(char, input_stream, template_border):
         read_sequence = []
-        char = input_stream.read(1)
-        read_sequence.append(char)
 
         if char == template_border[0]:
             char = input_stream.read(1)
             read_sequence.append(char)
 
-            if char == template_border[1]:
-                char = input_stream.read(1)
-                read_sequence.append(char)
-
-                return True, read_sequence
-            else:
-                return False, read_sequence
+            return char == template_border[1], read_sequence
         else:
             return False, read_sequence
