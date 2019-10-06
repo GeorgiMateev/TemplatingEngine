@@ -4,6 +4,7 @@ from typing import Dict, List
 
 from src.engine import stream_reader
 from src.engine.parser import Parser
+from src.engine.syntax_tree_processor import process_syntax_tree
 from src.model.syntax_node import SyntaxNode
 from src.model.syntax_tree import SyntaxTree
 
@@ -42,6 +43,7 @@ class TemplatingEngine:
                  function_close="/",
                  template_closing="}}",
                  throw_invalid=False):
+        self.throw_invalid = throw_invalid
         self.opening = template_opening
         self.global_variables = global_variables
         self.parser = Parser(
@@ -50,69 +52,32 @@ class TemplatingEngine:
             function_close,
             template_closing)
 
-    def parse(self,
-              input_stream: TextIOBase,
-              output_stream: TextIOBase,
-              variables: Dict,
-              function_stack: List):
-        current_template_text = []
+    def process(self,
+                input_stream: TextIOBase,
+                output_stream: TextIOBase):
         syntax_tree = SyntaxTree()
 
-        has_opening, current_template_text = try_detect_opening(
-            input_stream,
-            current_template_text)
+        token = self.parser.parse_single_construct(input_stream)
 
-        if has_opening:
-            has_function, function_name, current_template_text = try_detect_function(
-                input_stream, current_template_text)
+        while not token.function_name == "end":
+            syntax_node = SyntaxNode(token.function_name, token.arguments)
+            if token.scope.NONE:
+                syntax_tree.add_node_to_current_level(syntax_node)
+            elif token.scope.OPEN:
+                syntax_tree.branch_with_new_node(syntax_node)
+            elif token.scope.CLOSE:
+                syntax_tree.return_to_upper_level()
 
-            if has_function:
-                has_arguments, arguments, current_template_text = try_detect_function_args(
-                    input_stream, function_name, current_template_text)
+            # once we have flat structure (simple text or after loop exit)
+            # we can process and output a result
+            if syntax_tree.current_level == 1:
+                result = process_syntax_tree(
+                    syntax_tree,
+                    self.global_variables,
+                    self.throw_invalid)
 
-                if has_arguments:
-                    has_template_closing, current_template_text = try_detect_template_closing(
-                        input_stream, current_template_text)
+                output_stream.write(result)
 
-                    if has_template_closing:
-                        function_node = SyntaxNode(function_name, arguments)
-                        syntax_tree.branch_with_new_node(function_name)
+                syntax_tree = SyntaxTree()
 
-                    else:
-                        handle_error_state(
-                            output_stream,
-                            current_template_text,
-                            syntax_tree)
-
-                else:
-                    handle_error_state(
-                        output_stream,
-                        current_template_text,
-                        syntax_tree)
-
-            else:
-                has_variable, variable, current_template_text = try_detect_variable(
-                    input_stream, current_template_text)
-
-                if has_variable:
-                    has_template_closing, current_template_text = try_detect_template_closing(
-                        input_stream, current_template_text)
-
-                    if has_template_closing:
-                        print_node = SyntaxNode("print", variable)
-                        syntax_tree.add_node_to_current_level(print_node)
-
-                    else:
-                        handle_error_state(
-                            output_stream,
-                            current_template_text,
-                            syntax_tree)
-
-                else:
-                    handle_error_state(
-                        output_stream,
-                        current_template_text,
-                        syntax_tree)
-
-        else:
-            print_char(current_template_text, output_stream)
+            token = self.parser.parse_single_construct(input_stream)

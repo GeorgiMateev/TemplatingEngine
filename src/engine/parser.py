@@ -65,7 +65,7 @@ class Parser:
                     return ParsedToken(
                         False,
                         'error',
-                        [],
+                        [''.join(read_sequence)],
                         ScopeAction.NONE,
                         raw_text=read_sequence)
             elif char == self.function_close:
@@ -94,7 +94,7 @@ class Parser:
                     return ParsedToken(
                         False,
                         'error',
-                        [],
+                        [''.join(read_sequence)],
                         ScopeAction.NONE,
                         raw_text=read_sequence)
             else:
@@ -123,7 +123,7 @@ class Parser:
                 return ParsedToken(
                     False,
                     'error',
-                    [],
+                    [''.join(read_sequence)],
                     ScopeAction.NONE,
                     raw_text=read_sequence)
 
@@ -131,7 +131,7 @@ class Parser:
             return ParsedToken(
                 True,
                 "raw",
-                [],
+                [''.join(read_sequence)],
                 ScopeAction.NONE,
                 raw_text=read_sequence)
 

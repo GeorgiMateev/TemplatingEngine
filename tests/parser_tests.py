@@ -12,11 +12,11 @@ class ParserTests(unittest.TestCase):
         test_stream = io.StringIO("a {{test}} v")
 
         expected_result = [
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["a"]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, [" "]),
+            ParsedToken(True, "raw", ["a"], ScopeAction.NONE, ["a"]),
+            ParsedToken(True, "raw", [" "], ScopeAction.NONE, [" "]),
             ParsedToken(True, "print", ["test"], ScopeAction.NONE, list("{{test}}")),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, [" "]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["v"]),
+            ParsedToken(True, "raw", [" "], ScopeAction.NONE, [" "]),
+            ParsedToken(True, "raw", ["v"], ScopeAction.NONE, ["v"]),
             ParsedToken(True, "end", [], ScopeAction.NONE, [])
         ]
 
@@ -30,11 +30,11 @@ class ParserTests(unittest.TestCase):
         test_stream = io.StringIO("a {{#loop arg1 arg2}} v")
 
         expected_result = [
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["a"]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, [" "]),
+            ParsedToken(True, "raw", ["a"], ScopeAction.NONE, ["a"]),
+            ParsedToken(True, "raw", [" "], ScopeAction.NONE, [" "]),
             ParsedToken(True, "loop", ["arg1", "arg2"], ScopeAction.OPEN, list("{{#loop arg1 arg2}}")),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, [" "]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["v"]),
+            ParsedToken(True, "raw", [" "], ScopeAction.NONE, [" "]),
+            ParsedToken(True, "raw", ["v"], ScopeAction.NONE, ["v"]),
             ParsedToken(True, "end", [], ScopeAction.NONE, [])
         ]
 
@@ -48,11 +48,11 @@ class ParserTests(unittest.TestCase):
         test_stream = io.StringIO("a {{/loop}} v")
 
         expected_result = [
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["a"]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, [" "]),
+            ParsedToken(True, "raw", ["a"], ScopeAction.NONE, ["a"]),
+            ParsedToken(True, "raw", [" "], ScopeAction.NONE, [" "]),
             ParsedToken(True, "loop", [], ScopeAction.CLOSE, list("{{/loop}}")),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, [" "]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["v"]),
+            ParsedToken(True, "raw", [" "], ScopeAction.NONE, [" "]),
+            ParsedToken(True, "raw", ["v"], ScopeAction.NONE, ["v"]),
             ParsedToken(True, "end", [], ScopeAction.NONE, [])
         ]
 
@@ -66,16 +66,16 @@ class ParserTests(unittest.TestCase):
         test_stream = io.StringIO("a {loop}} v")
 
         expected_result = [
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["a"]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, [" "]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, list("{l")),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["o"]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["o"]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["p"]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["}"]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["}"]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, [" "]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["v"]),
+            ParsedToken(True, "raw", ["a"], ScopeAction.NONE, ["a"]),
+            ParsedToken(True, "raw", [" "], ScopeAction.NONE, [" "]),
+            ParsedToken(True, "raw", ["{l"], ScopeAction.NONE, list("{l")),
+            ParsedToken(True, "raw", ["o"], ScopeAction.NONE, ["o"]),
+            ParsedToken(True, "raw", ["o"], ScopeAction.NONE, ["o"]),
+            ParsedToken(True, "raw", ["p"], ScopeAction.NONE, ["p"]),
+            ParsedToken(True, "raw", ["}"], ScopeAction.NONE, ["}"]),
+            ParsedToken(True, "raw", ["}"], ScopeAction.NONE, ["}"]),
+            ParsedToken(True, "raw", [" "], ScopeAction.NONE, [" "]),
+            ParsedToken(True, "raw", ["v"], ScopeAction.NONE, ["v"]),
             ParsedToken(True, "end", [], ScopeAction.NONE, [])
         ]
 
@@ -89,10 +89,10 @@ class ParserTests(unittest.TestCase):
         test_stream = io.StringIO("a {{arg} v")
 
         expected_result = [
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["a"]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, [" "]),
-            ParsedToken(False, "error", [], ScopeAction.NONE, list("{{arg} ")),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["v"]),
+            ParsedToken(True, "raw", ["a"], ScopeAction.NONE, ["a"]),
+            ParsedToken(True, "raw", [" "], ScopeAction.NONE, [" "]),
+            ParsedToken(False, "error", ["{{arg} "], ScopeAction.NONE, list("{{arg} ")),
+            ParsedToken(True, "raw", ["v"], ScopeAction.NONE, ["v"]),
             ParsedToken(True, "end", [], ScopeAction.NONE, [])
         ]
 
@@ -106,10 +106,10 @@ class ParserTests(unittest.TestCase):
         test_stream = io.StringIO("a {{#loop arg1 arg2} v")
 
         expected_result = [
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["a"]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, [" "]),
-            ParsedToken(False, "error", [], ScopeAction.NONE, list("{{#loop arg1 arg2} ")),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["v"]),
+            ParsedToken(True, "raw", ["a"], ScopeAction.NONE, ["a"]),
+            ParsedToken(True, "raw", [" "], ScopeAction.NONE, [" "]),
+            ParsedToken(False, "error", ["{{#loop arg1 arg2} "], ScopeAction.NONE, list("{{#loop arg1 arg2} ")),
+            ParsedToken(True, "raw", ["v"], ScopeAction.NONE, ["v"]),
             ParsedToken(True, "end", [], ScopeAction.NONE, [])
         ]
 
@@ -123,10 +123,10 @@ class ParserTests(unittest.TestCase):
         test_stream = io.StringIO("a {{/loop} v")
 
         expected_result = [
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["a"]),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, [" "]),
-            ParsedToken(False, "error", [], ScopeAction.NONE, list("{{/loop} ")),
-            ParsedToken(True, "raw", [], ScopeAction.NONE, ["v"]),
+            ParsedToken(True, "raw", ["a"], ScopeAction.NONE, ["a"]),
+            ParsedToken(True, "raw", [" "], ScopeAction.NONE, [" "]),
+            ParsedToken(False, "error", ["{{/loop} "], ScopeAction.NONE, list("{{/loop} ")),
+            ParsedToken(True, "raw", ["v"], ScopeAction.NONE, ["v"]),
             ParsedToken(True, "end", [], ScopeAction.NONE, [])
         ]
 
