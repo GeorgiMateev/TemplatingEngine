@@ -1,4 +1,4 @@
-from io import TextIOBase
+from typing import TextIO
 
 from src.model.parsed_token import ParsedToken, ScopeAction
 
@@ -14,7 +14,7 @@ class Parser:
         self.function_open = function_open
         self.template_opening = template_opening
 
-    def parse_single_construct(self, input_stream: TextIOBase):
+    def parse_single_construct(self, input_stream: TextIO):
         read_sequence = []
         char = input_stream.read(1)
 

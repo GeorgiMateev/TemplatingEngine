@@ -1,43 +1,14 @@
-import io
-from io import TextIOBase
-from typing import Dict, List
+from typing import List, Mapping, Union, TextIO
 
-from src.engine import stream_reader
 from src.engine.parser import Parser
 from src.engine.syntax_tree_processor import process_syntax_tree
 from src.model.syntax_node import SyntaxNode
 from src.model.syntax_tree import SyntaxTree
 
 
-def try_detect_opening(input_stream, current_read_text):
-    pass
-
-
-def execute_loop(arguments, variables, function_stack, input_stream,
-                 function_out_stream):
-    iteration_values_var, identifier_var = arguments
-    iteration_values = variables[iteration_values_var]
-
-    for value in iteration_values:
-        new_scope_vars = {**variables, **{identifier_var: value}}
-        new_stack = function_stack + ['loop']
-
-
-def execute_function(function_name, arguments, variables, function_stack,
-                     input_stream, function_out_stream):
-
-    if function_name == "loop":
-        execute_loop(arguments, variables, function_stack, input_stream, function_out_stream)
-
-
-def handle_error_state(output_stream, current_template_text,
-                       syntax_tree):
-    pass
-
-
 class TemplatingEngine:
     def __init__(self,
-                 global_variables: Dict,
+                 global_variables: Mapping[str, Union[str, List[str]]],
                  template_opening="{{",
                  function_open="#",
                  function_close="/",
@@ -53,8 +24,8 @@ class TemplatingEngine:
             template_closing)
 
     def process(self,
-                input_stream: TextIOBase,
-                output_stream: TextIOBase):
+                input_stream: TextIO,
+                output_stream: TextIO):
         syntax_tree = SyntaxTree()
 
         token = self.parser.parse_single_construct(input_stream)

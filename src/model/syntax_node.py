@@ -8,5 +8,5 @@ from typing import List
 class SyntaxNode:
     function_name: str
     arguments: List
-    parent: SyntaxNode
+    parent: SyntaxNode = None
     body: List[SyntaxNode] = field(default_factory=list)

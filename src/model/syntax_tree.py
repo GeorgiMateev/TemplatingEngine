@@ -5,7 +5,7 @@ from src.model.syntax_node import SyntaxNode
 
 @dataclass
 class SyntaxTree:
-    root: SyntaxNode = SyntaxNode()
+    root: SyntaxNode = SyntaxNode("root", [])
     current_node = root
     current_level: int = 1
 
