@@ -3,11 +3,15 @@ from dataclasses import dataclass
 from src.model.syntax_node import SyntaxNode
 
 
-@dataclass
 class SyntaxTree:
-    root: SyntaxNode = SyntaxNode("root", [])
-    current_node = root
-    current_level: int = 1
+    def __init__(self,
+                 root: SyntaxNode = None,
+                 current_level: int = 1):
+        if root is None:
+            root = SyntaxNode("root", [])
+        self.current_level = current_level
+        self.root = root
+        self.current_node = root
 
     def add_node_to_current_level(self, node: SyntaxNode):
         self.current_node.body.append(node)

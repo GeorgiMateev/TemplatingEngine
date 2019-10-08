@@ -2,6 +2,7 @@ from typing import List, Mapping, Union, TextIO
 
 from src.engine.parser import Parser
 from src.engine.syntax_tree_processor import process_syntax_tree
+from src.model.parsed_token import ScopeAction
 from src.model.syntax_node import SyntaxNode
 from src.model.syntax_tree import SyntaxTree
 
@@ -32,11 +33,11 @@ class TemplatingEngine:
 
         while not token.function_name == "end":
             syntax_node = SyntaxNode(token.function_name, token.arguments)
-            if token.scope.NONE:
+            if token.scope is ScopeAction.NONE:
                 syntax_tree.add_node_to_current_level(syntax_node)
-            elif token.scope.OPEN:
+            elif token.scope is ScopeAction.OPEN:
                 syntax_tree.branch_with_new_node(syntax_node)
-            elif token.scope.CLOSE:
+            elif token.scope is ScopeAction.CLOSE:
                 syntax_tree.return_to_upper_level()
 
             # once we have flat structure (simple text or after loop exit)

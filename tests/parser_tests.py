@@ -134,6 +134,23 @@ class ParserTests(unittest.TestCase):
 
         self.assert_parsed_tokens(actual_result, expected_result)
 
+    def test_template_with_only_open_brackets(self):
+        parser = Parser()
+
+        test_stream = io.StringIO("a {{arg1 v")
+
+        expected_result = [
+            ParsedToken(True, "raw", ["a"], ScopeAction.NONE, ["a"]),
+            ParsedToken(True, "raw", [" "], ScopeAction.NONE, [" "]),
+            ParsedToken(False, "error", ["{{arg1 "], ScopeAction.NONE, list("{{arg1 ")),
+            ParsedToken(True, "raw", ["v"], ScopeAction.NONE, ["v"]),
+            ParsedToken(True, "end", [], ScopeAction.NONE, [])
+        ]
+
+        actual_result = self.parse_stream(parser, test_stream)
+
+        self.assert_parsed_tokens(actual_result, expected_result)
+
     @staticmethod
     def parse_stream(parser, test_stream):
         actual_result = []
