@@ -29,7 +29,7 @@ class TemplatingEngine:
                 output_stream: TextIO):
         syntax_tree = SyntaxTree()
 
-        token = self.parser.parse_single_construct(input_stream)
+        token = self.parser.parse_single_token(input_stream)
 
         while not token.function_name == "end":
             syntax_node = SyntaxNode(token.function_name, token.arguments)
@@ -52,4 +52,4 @@ class TemplatingEngine:
 
                 syntax_tree = SyntaxTree()
 
-            token = self.parser.parse_single_construct(input_stream)
+            token = self.parser.parse_single_token(input_stream)

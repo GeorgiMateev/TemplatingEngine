@@ -154,10 +154,10 @@ class ParserTests(unittest.TestCase):
     @staticmethod
     def parse_stream(parser, test_stream):
         actual_result = []
-        token = parser.parse_single_construct(test_stream)
+        token = parser.parse_single_token(test_stream)
         actual_result.append(token)
         while not token.function_name == "end":
-            token = parser.parse_single_construct(test_stream)
+            token = parser.parse_single_token(test_stream)
             actual_result.append(token)
         return actual_result
 
