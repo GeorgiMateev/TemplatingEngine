@@ -1,0 +1,2 @@
+This is a sample template named {{name}}. You can use it to try the engine from the command line.
+You can loop over {{#loop vars item}}Item: {{item}} {{/loop}}

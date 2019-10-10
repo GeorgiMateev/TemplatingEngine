@@ -1,0 +1,2 @@
+This is a sample template named MyTemplate. You can use it to try the engine from the command line.
+You can loop over Item: apple Item: banana 

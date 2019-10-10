@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from src.model.syntax_node import SyntaxNode
 
 
