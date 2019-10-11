@@ -10,23 +10,38 @@ from src.model.syntax_tree import SyntaxTree
 class TemplatingEngine:
     def __init__(self,
                  global_variables: Mapping[str, Union[str, List[str]]],
-                 template_opening="{{",
+                 template_open="{{",
+                 template_close="}}",
                  function_open="#",
                  function_close="/",
-                 template_closing="}}",
                  throw_invalid=False):
+        """
+        Create new template engine.
+        :param global_variables: Dictionary with variables used in the engine.
+            For vars used in loops provide list with values.
+        :param template_open: Two characters that define how template is started.
+        :param template_close: Two characters that define how template is closed.
+        :param function_open: One character defining start of a function.
+        :param function_close: One character defining end of a function.
+        :param throw_invalid: Raise error on invalid syntax.
+        """
         self.throw_invalid = throw_invalid
-        self.opening = template_opening
+        self.opening = template_open
         self.global_variables = global_variables
         self.parser = Parser(
-            template_opening,
+            template_open,
             function_open,
             function_close,
-            template_closing)
+            template_close)
 
     def process(self,
                 input_stream: TextIO,
                 output_stream: TextIO):
+        """
+        Start processing input stream and write the result into the output stream.
+        :param input_stream: The text input. Make sure that proper buffering is used.
+        :param output_stream: The output text stream. Make sure proper buffering is used.
+        """
         syntax_tree = SyntaxTree()
 
         token = self.parser.parse_single_token(input_stream)

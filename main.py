@@ -6,19 +6,29 @@ from src.engine.engine import TemplatingEngine
 
 
 def main(argv):
-    input_file = ''
-    output_file = ''
-    variables_json = ''
     try:
         opts, args = getopt.getopt(argv,
                                    "hi:o:v:",
-                                   ["input-file=", "output-file=", "variables="])
+                                   ["input-file=",
+                                    "output-file=",
+                                    "variables=",
+                                    "template-open=",
+                                    "template-close=",
+                                    "func-open=",
+                                    "func-close=",
+                                    "raise"])
     except getopt.GetoptError:
-        print('test.py -i <inputfile> -o <outputfile> -v <variables json>')
+        print_help()
         sys.exit(2)
+
+    input_file = ''
+    output_file = ''
+    variables_json = ''
+    additional_params = {}
+
     for opt, arg in opts:
         if opt == '-h':
-            print('test.py -i <inputfile> -o <outputfile> -v <variables json>')
+            print_help()
             sys.exit()
         elif opt in ("-i", "--input-file"):
             input_file = arg
@@ -26,6 +36,16 @@ def main(argv):
             output_file = arg
         elif opt in ("-v", "--variables"):
             variables_json = arg
+        elif opt == '--template-open':
+            additional_params['template_open'] = arg
+        elif opt == '--template-close':
+            additional_params['template_close'] = arg
+        elif opt == '--func-open':
+            additional_params['function_open'] = arg
+        elif opt == '--func-close':
+            additional_params['function_close'] = arg
+        elif opt == '--raise':
+            additional_params['throw_invalid'] = True
             
     if not input_file:
         print("Please provide input file with -i or --input-file")
@@ -44,12 +64,23 @@ def main(argv):
     print('Variables: ', variables_json)
 
     variables = json.loads(variables_json)
+    additional_params['global_variables'] = variables
 
-    engine = TemplatingEngine(variables)
+    engine = TemplatingEngine(**additional_params)
 
     with open(input_file, 'r', 5120, 'utf-8') as input_stream:
         with open(output_file, 'w', 5120, 'utf-8') as output_stream:
             engine.process(input_stream, output_stream)
+
+
+def print_help():
+    print('main.py -i <inputfile> -o <outputfile> -v <variables json>')
+    print('Optional params:')
+    print('--template-open=<two characters for starting template, default: {{>')
+    print('--template-close=<two characters for closing template, default: }}>')
+    print('--func-open=<one character for starting special function, default: #>')
+    print('--func-close=<one character for ending special function, default: />')
+    print('--raise to raise error on invalid syntax')
 
 
 if __name__ == "__main__":

@@ -192,12 +192,8 @@ class E2EEngineTests(unittest.TestCase):
         template_close = ">>"
         function_open = "*"
         function_close = "@"
-        engine = TemplatingEngine(
-            variables,
-            template_opening,
-            function_open,
-            function_close,
-            template_close)
+        engine = TemplatingEngine(variables, template_opening, template_close,
+                                  function_open, function_close)
 
         output = io.StringIO()
         engine.process(test_stream, output)
