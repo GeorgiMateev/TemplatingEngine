@@ -1,7 +1,9 @@
 from typing import List, Mapping, Union, TextIO
 
 from src.engine.parser import Parser
+from src.engine.syntax_analyser import SyntaxAnalyser
 from src.engine.syntax_tree_processor import process_syntax_tree
+from src.model.function_signiture import FunctionSignature
 from src.model.parsed_token import ScopeAction
 from src.model.syntax_node import SyntaxNode
 from src.model.syntax_tree import SyntaxTree
@@ -44,15 +46,26 @@ class TemplatingEngine:
         """
         syntax_tree = SyntaxTree()
 
+        supported_functions = [
+            FunctionSignature("raw", 1, False),
+            FunctionSignature("error", 1, False),
+            FunctionSignature("loop", 2, True),
+            FunctionSignature("print", 1, False),
+        ]
+        syntax_analyser = SyntaxAnalyser(supported_functions)
+
         token = self.parser.parse_single_token(input_stream)
 
         while not token.function_name == "end":
-            syntax_node = SyntaxNode(token.function_name, token.arguments)
-            if token.scope is ScopeAction.NONE:
+            is_valid, analysed_token = syntax_analyser.analyse_token(
+                syntax_tree.current_node,
+                token)
+            syntax_node = SyntaxNode(analysed_token.function_name, analysed_token.arguments)
+            if analysed_token.scope is ScopeAction.NONE:
                 syntax_tree.add_node_to_current_level(syntax_node)
-            elif token.scope is ScopeAction.OPEN:
+            elif analysed_token.scope is ScopeAction.OPEN:
                 syntax_tree.branch_with_new_node(syntax_node)
-            elif token.scope is ScopeAction.CLOSE:
+            elif analysed_token.scope is ScopeAction.CLOSE:
                 syntax_tree.return_to_upper_level()
 
             # once we have flat structure (simple text or after loop exit)

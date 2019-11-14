@@ -80,6 +80,40 @@ class E2EEngineTests(unittest.TestCase):
 
         self.assertEqual(expected, actual)
 
+    def test_condition(self):
+        test_stream = io.StringIO(''.join([
+            "First line.",
+            "{{header}}",
+            "{{#loop somearray item}}",
+            "{{#if item eq term}}"
+            "This is a {{item}}.",
+            "{{/if}}",
+            "{{/loop}}",
+            "{{footer}}",
+            "Last line."]))
+
+        variables = {
+            "header": "Hello!",
+            "term": "banana",
+            "somearray": ["apple", "banana", "citrus"],
+            "footer": "That's it!"
+        }
+
+        engine = TemplatingEngine(variables)
+
+        output = io.StringIO()
+        engine.process(test_stream, output)
+
+        expected = ''.join(["First line.",
+                            "Hello!",
+                            "This is a banana.",
+                            "That's it!",
+                            "Last line."])
+
+        actual = output.getvalue()
+
+        self.assertEqual(expected, actual)
+
     def test_nested_loop(self):
         test_stream = io.StringIO(''.join([
             "First line.",
